@@ -1,6 +1,8 @@
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -39,10 +41,22 @@ public class Test1 {
 
         WebElement signin=driver.findElement(By.id("com.fti.surefleet.fuel2.android:id/signInBtn"));
         signin.click();
+        allowAppPermission();
+
+        WebElement message=driver.findElement(By.id("com.fti.surefleet.fuel2.android:id/dialogMessageId"));
+        String messageText = message.getText();
+        String expectedMessage = "Username or Password are incorrect";
+        Assert.assertEquals(messageText, expectedMessage);
     }
 
     @After
     public void tearDown(){
         driver.quit();
+    }
+
+    public void allowAppPermission(){
+        while (driver.findElements(MobileBy.id("com.android.packageinstaller:id/dialog_container")).size()>0){
+            driver.findElement(MobileBy.id("com.android.packageinstaller:id/permission_allow_button")).click();
+        }
     }
 }
