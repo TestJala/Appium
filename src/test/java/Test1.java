@@ -1,5 +1,3 @@
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.MobileBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.After;
 import org.junit.Assert;
@@ -11,6 +9,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class Test1 {
     private static AndroidDriver driver;
@@ -26,8 +25,10 @@ public class Test1 {
         capabilities.setCapability("platformVersion","7.1");
         capabilities.setCapability("appPackage","com.fti.surefleet.fuel2.android");
         capabilities.setCapability("appActivity","com.surefleet.view.DashboardActivity");
+        //capabilities.setCapability("autoGrantPermissions","true");
 
         driver = new AndroidDriver(new URL("http://127.0.1.1:4723/wd/hub"), capabilities);
+        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
     }
 
@@ -43,10 +44,12 @@ public class Test1 {
         signin.click();
         allowAppPermission();
 
-        WebElement message=driver.findElement(By.id("com.fti.surefleet.fuel2.android:id/dialogMessageId"));
-        String messageText = message.getText();
-        String expectedMessage = "Username or Password are incorrect";
-        Assert.assertEquals(messageText, expectedMessage);
+        if(driver.getCurrentPackage().contains("com.fti.surefleet.fuel2.android")) {
+            WebElement message = driver.findElement(By.id("com.fti.surefleet.fuel2.android:id/dialogMessageId"));
+            String messageText = message.getAttribute("text");
+            String expectedMessage = "Username or Password are incorrect";
+            Assert.assertEquals(messageText, expectedMessage);
+        }
     }
 
     @After
@@ -55,8 +58,8 @@ public class Test1 {
     }
 
     public void allowAppPermission(){
-        while (driver.findElements(MobileBy.id("com.android.packageinstaller:id/dialog_container")).size()>0){
-            driver.findElement(MobileBy.id("com.android.packageinstaller:id/permission_allow_button")).click();
+        while(driver.currentActivity().contains("GrantPermissionsActivity")){
+            driver.findElement(By.id("com.android.packageinstaller:id/permission_allow_button")).click();
         }
     }
 }
